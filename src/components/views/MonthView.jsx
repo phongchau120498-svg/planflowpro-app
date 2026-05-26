@@ -19,13 +19,13 @@ const MonthView = ({
     selectedTaskId
 }) => {
     return (
-        <div className="flex-1 flex flex-col overflow-hidden bg-white">
-            <div className="grid grid-cols-7 border-b border-gray-200 bg-gray-50/80">
+        <div className="flex-1 flex flex-col overflow-hidden bg-white glass:bg-transparent">
+            <div className="grid grid-cols-7 border-b border-gray-200 bg-gray-50/80 glass:bg-black/40 glass:border-white/10 glass:backdrop-blur-md">
                 {['Thứ 2', 'Thứ 3', 'Thứ 4', 'Thứ 5', 'Thứ 6', 'Thứ 7', 'CN'].map(d => (
-                    <div key={d} className="p-3 text-center text-[11px] font-bold text-gray-500 uppercase tracking-widest">{d}</div>
+                    <div key={d} className="p-3 text-center text-[11px] font-bold text-gray-500 glass:text-gray-200 uppercase tracking-widest">{d}</div>
                 ))}
             </div>
-            <div className="flex-1 grid grid-cols-7 grid-rows-6 bg-gray-200 gap-px overflow-y-auto">
+            <div className="flex-1 grid grid-cols-7 grid-rows-6 bg-gray-200 gap-px overflow-y-auto glass:bg-white/10 glass:backdrop-blur-sm">
                 {monthGridDays.map((day, idx) => {
                     const dateStr = formatDateKey(day);
                     const isToday = dateStr === formatDateKey(new Date());
@@ -34,13 +34,13 @@ const MonthView = ({
                     return (
                         <div
                             key={`${dateStr}-${idx}`}
-                            className={`bg-white p-1.5 flex flex-col transition-colors min-h-[90px] ${!isCurrentMonth ? 'bg-gray-50/50' : ''} hover:bg-gray-50/80 cursor-pointer overflow-hidden`}
+                            className={`bg-white p-1.5 flex flex-col transition-colors min-h-[90px] ${!isCurrentMonth ? 'bg-gray-50/50 glass:bg-black/20' : 'glass:bg-black/40'} hover:bg-gray-50/80 glass:hover:bg-white/10 cursor-pointer overflow-hidden`}
                             onDragOver={handleDragOver}
                             onDrop={(e) => handleDrop(e, null, dateStr)}
                             onDoubleClick={() => handleOpenAddTask({ date: dateStr })}
                         >
                             <div className="flex justify-center mb-1">
-                                <div className={`text-xs font-bold w-6 h-6 flex items-center justify-center rounded-full ${isToday ? 'bg-indigo-600 text-white shadow-md' : (!isCurrentMonth ? 'text-gray-400' : 'text-slate-700')}`}>
+                                <div className={`text-xs font-bold w-6 h-6 flex items-center justify-center rounded-full ${isToday ? 'bg-indigo-600 text-white shadow-md glass:!bg-indigo-500/20 glass:!border glass:!border-indigo-500/30 glass:!text-indigo-200 glass:!shadow-[0_0_15px_rgba(99,102,241,0.2)] glass:backdrop-blur-md' : (!isCurrentMonth ? 'text-gray-400 glass:text-gray-500' : 'text-slate-700 glass:text-gray-100')}`}>
                                     {day.getDate()}
                                 </div>
                             </div>
@@ -67,13 +67,12 @@ const MonthView = ({
                                         const task = item.task;
                                         const catColorObj = categories.find(c => c.id === task.categoryId)?.color;
                                         
-                                        // LOGIC MỚI: NẾU HOÀN THÀNH THÌ CHUYỂN MÀU XÁM, NẾU CHƯA THÌ LẤY MÀU HẠNG MỤC
+                                        // LOGIC MỚI: CẬP NHẬT CHO GLASS MODE TƯƠNG TỰ TASKCARD
                                         const isCompleted = task.isCompleted;
                                         const activeBg = catColorObj?.value?.split(' ')[0] || 'bg-gray-200';
                                         const activeText = catColorObj?.text || 'text-slate-700';
                                         
-                                        const finalBg = isCompleted ? 'bg-gray-200/60' : activeBg;
-                                        const finalText = isCompleted ? 'text-gray-400' : activeText;
+                                        const finalBg = isCompleted ? 'bg-gray-200/60 glass:!bg-white/5 glass:!border-transparent' : `${activeBg} glass:!bg-white/15 glass:!backdrop-blur-sm`;
 
                                         const isStart = item.isStart !== undefined ? item.isStart : true;
                                         const isEnd = (task.endDate || task.date) === dateStr;
@@ -82,7 +81,7 @@ const MonthView = ({
                                         const isEndOfWeek = day.getDay() === 0;
                                         const isStartOfWeek = day.getDay() === 1;
 
-                                        let classes = `text-[10px] font-semibold py-1 px-1.5 h-[22px] truncate cursor-grab active:cursor-grabbing transition-all select-none ${finalBg} ${finalText} ${isCompleted ? 'opacity-60 line-through' : ''}`;
+                                        let classes = `text-[10px] font-semibold px-1.5 h-[22px] flex items-center gap-1.5 overflow-hidden cursor-grab active:cursor-grabbing transition-all select-none border border-transparent glass:!border-white/10 ${finalBg} ${isCompleted ? 'opacity-60 line-through' : ''}`;
 
                                         if (isMultiDayFeatureEnabled && isMultiDay) {
                                             if (!isStart && !isStartOfWeek) classes += ' rounded-l-none !ml-[-6px] !pl-[7px] border-l-0';
@@ -106,7 +105,14 @@ const MonthView = ({
                                                 onContextMenu={(e) => handleContextMenu(e, task)}
                                                 className={classes} title={task.title}
                                             >
-                                                {showText ? task.title : '\u00A0'}
+                                                {showText ? (
+                                                    <>
+                                                        <span className={`w-1.5 h-1.5 rounded-full shrink-0 ${isCompleted ? 'bg-gray-400 glass:!bg-gray-500' : 'bg-current ' + activeText}`}></span>
+                                                        <span className={`truncate ${isCompleted ? 'text-gray-500 glass:!text-gray-400' : activeText + ' glass:!text-gray-100'}`}>
+                                                            {task.title}
+                                                        </span>
+                                                    </>
+                                                ) : '\u00A0'}
                                             </div>
                                         );
                                     });

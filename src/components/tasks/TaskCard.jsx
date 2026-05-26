@@ -107,7 +107,7 @@ const TaskCard = ({
                     : 'transition-all duration-200 cursor-grab active:cursor-grabbing hover:-translate-y-[2px] hover:shadow-md active:scale-105 active:rotate-2 active:shadow-xl'
                 }
                 
-                ${task.isCompleted ? 'bg-gray-50/50 border-transparent' : `${finalColorValue} shadow-sm backdrop-blur-sm`}
+                ${task.isCompleted ? 'bg-gray-50/50 border-transparent glass:!bg-white/5 glass:!border-transparent' : `${finalColorValue} shadow-sm backdrop-blur-sm glass:!bg-white/10 glass:!border-white/20`}
                 ${isSelected && !isResizing ? `ring-2 ring-indigo-500 ring-offset-2 z-40` : ''}
                 ${isHighlighted && !isResizing ? 'ring-4 ring-yellow-400 ring-offset-2 z-40 scale-105 shadow-xl bg-yellow-50' : ''}
                 
@@ -129,7 +129,7 @@ const TaskCard = ({
                 </div>
                 <div className="flex-1 min-w-0 flex flex-col pt-0.5 pointer-events-none">
                     <div className="leading-snug break-words">
-                        <span className={`text-[15px] font-semibold task-title ${task.isCompleted ? 'completed' : 'text-gray-700'}`}>
+                        <span className={`text-[15px] font-semibold task-title ${task.isCompleted ? 'completed glass:!text-gray-400' : 'text-gray-700 glass:!text-gray-100'}`}>
                             {task.title}
                         </span>
                     </div>

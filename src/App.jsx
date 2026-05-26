@@ -80,11 +80,22 @@ export default function App() {
     const [isCreatingCategory, setIsCreatingCategory] = useState(false);
     const [newCategoryName, setNewCategoryName] = useState('');
     const [showAISettings, setShowAISettings] = useState(false);
+    const [glassMode, setGlassMode] = useState(() => localStorage.getItem('glassMode') === 'true');
 
     useEffect(() => {
         // Đảm bảo gỡ class dark nếu nó đang tồn tại
         document.documentElement.classList.remove('dark');
     }, []);
+
+    useEffect(() => {
+        if (glassMode) {
+            document.documentElement.classList.add('glass-mode');
+            localStorage.setItem('glassMode', 'true');
+        } else {
+            document.documentElement.classList.remove('glass-mode');
+            localStorage.setItem('glassMode', 'false');
+        }
+    }, [glassMode]);
 
     const scrollContainerRef = useRef(null);
     const previousDateRef = useRef(currentDate);
@@ -543,7 +554,13 @@ export default function App() {
     };
 
     return (
-        <div className="flex flex-col h-screen bg-gray-50 font-sans text-slate-800" onClick={() => { setSelectedTaskId(null); setContextMenu(null); }}>
+        <div className="flex flex-col h-screen bg-gray-50 font-sans text-slate-800 glass:bg-transparent glass:text-gray-100" onClick={() => { setSelectedTaskId(null); setContextMenu(null); }}>
+            {glassMode && (
+                <div className="fixed inset-0 z-[-1] overflow-hidden pointer-events-none">
+                    <img src="/glass-bg.png" alt="Background" className="w-full h-full object-cover opacity-90" />
+                    <div className="absolute inset-0 bg-black/60 backdrop-blur-[2px]"></div>
+                </div>
+            )}
 
             <Header
                 currentDate={currentDate} prevWeek={prevWeek} nextWeek={nextWeek} goToToday={goToToday} onDateSelect={handleDateSelect} zoomIndex={zoomIndex} onZoomChange={handleZoomChange} onUndo={undo} canUndo={canUndo} onRedo={redo} canRedo={canRedo}
@@ -583,8 +600,8 @@ export default function App() {
                     <div ref={scrollContainerRef} className="flex-1 overflow-auto custom-scrollbar" onScroll={handleScroll}>
                         <div className="inline-block min-w-full relative z-0">
 
-                            <div className="sticky top-0 z-50 bg-white/90 backdrop-blur-md flex border-b border-gray-200/60 shadow-sm transition-all">
-                                <div className="sticky left-0 z-50 bg-white/95 backdrop-blur-md border-r border-gray-200/60 p-4 flex items-center font-bold text-gray-500 bg-gray-50/50 box-border group" style={{ width: sidebarWidth, minWidth: sidebarWidth }}>
+                            <div className="sticky top-0 z-50 bg-white/90 backdrop-blur-md flex border-b border-gray-200/60 shadow-sm transition-all glass:!bg-black/30 glass:!border-white/10 glass:shadow-glass glass:backdrop-blur-xl">
+                                <div className="sticky left-0 z-50 bg-white/95 backdrop-blur-md border-r border-gray-200/60 p-4 flex items-center font-bold text-gray-500 bg-gray-50/50 box-border group glass:!border-r-white/10 glass:!text-gray-300" style={{ width: sidebarWidth, minWidth: sidebarWidth, ...(glassMode ? { background: "linear-gradient(rgba(0,0,0,0.65), rgba(0,0,0,0.65)), url('/glass-bg.png') center/cover fixed" } : {}) }}>
                                     Hạng Mục / Deadline
                                     <div className="absolute right-0 top-0 bottom-0 w-1 cursor-col-resize hover:bg-indigo-500 group-hover:bg-gray-300 transition-colors z-30" onMouseDown={startResizingSidebar} />
                                 </div>
@@ -592,10 +609,10 @@ export default function App() {
                                     const dayKey = formatDateKey(day); const isTodayDate = dayKey === formatDateKey(new Date());
                                     const isMonday = index % 7 === 0; const isWeekend = day.getDay() === 0 || day.getDay() === 6;
                                     return (
-                                        <div key={dayKey} style={{ width: dayWidth, minWidth: dayWidth }} className={`flex-shrink-0 p-3 text-center flex flex-col justify-center transition-all duration-200 ease-out relative ${isTodayDate ? 'bg-indigo-50/50' : (isWeekend ? 'bg-slate-50/50' : 'bg-white')}`}>
+                                        <div key={dayKey} style={{ width: dayWidth, minWidth: dayWidth }} className={`flex-shrink-0 p-3 text-center flex flex-col justify-center transition-all duration-200 ease-out relative ${isTodayDate ? 'bg-indigo-50/50 glass:bg-indigo-900/30' : (isWeekend ? 'bg-slate-50/50 glass:bg-transparent' : 'bg-white glass:bg-transparent')}`}>
                                             {isMonday && (<div className="absolute top-0 left-0 right-0 -mt-1 text-[10px] font-bold text-indigo-400 uppercase tracking-widest text-center">Tuần {day.getDate()} - {new Date(day.getTime() + 6 * 86400000).getDate()}/{day.getMonth() + 1}</div>)}
-                                            <span className={`text-[10px] font-bold uppercase tracking-wider mb-1 ${isTodayDate ? 'text-indigo-600' : 'text-gray-400'}`}>{getDayName(day)}</span>
-                                            <span className={`text-2xl font-light w-10 h-10 flex items-center justify-center mx-auto rounded-full transition-all ${isTodayDate ? 'bg-indigo-600 text-white shadow-lg shadow-indigo-200' : 'text-gray-700'}`}>{formatDateDisplay(day)}</span>
+                                            <span className={`text-[10px] font-bold uppercase tracking-wider mb-1 ${isTodayDate ? 'text-indigo-600 glass:!text-indigo-300' : 'text-gray-400 glass:!text-gray-400'}`}>{getDayName(day)}</span>
+                                            <span className={`text-2xl font-light w-10 h-10 flex items-center justify-center mx-auto rounded-full transition-all ${isTodayDate ? 'bg-indigo-600 text-white shadow-lg shadow-indigo-200 glass:!bg-indigo-500/20 glass:!border glass:!border-indigo-500/30 glass:!text-indigo-200 glass:!shadow-[0_0_15px_rgba(99,102,241,0.2)] glass:backdrop-blur-md' : 'text-gray-700 glass:!text-gray-300'}`}>{formatDateDisplay(day)}</span>
                                         </div>
                                     );
                                 })}
@@ -607,9 +624,10 @@ export default function App() {
                                 const firstVisibleDateStr = formatDateKey(visibleDays[0]);
 
                                 return (
-                                    <div key={category.id} className={`flex border-b border-gray-300 group ${draggedCategoryIndex === index ? 'opacity-40 border-dashed border-indigo-400' : ''}`} onDragOver={handleCategoryDragOver} onDrop={(e) => handleCategoryDrop(e, index)}>
-                                        <div draggable onDragStart={(e) => handleCategoryDragStart(e, index)} className={`sticky left-0 z-40 bg-white/95 backdrop-blur-sm border-r border-gray-200/60 p-4 flex flex-col justify-center group-hover:bg-gray-50 transition-colors border-l-4 ${category.color.value.replace('bg-', 'border-').split(' ')[0]} shadow-[4px_0_24px_rgba(0,0,0,0.02)]`} style={{ width: sidebarWidth, minWidth: sidebarWidth, borderLeftColor: category.color?.hex || '#ccc' }}>
-                                            <div className="font-semibold text-gray-800 flex items-center justify-between group/header overflow-hidden">
+                                    <div key={category.id} className={`flex border-b border-gray-300 glass:border-white/10 group ${draggedCategoryIndex === index ? 'opacity-40 border-dashed border-indigo-400 glass:!border-indigo-400' : ''}`} onDragOver={handleCategoryDragOver} onDrop={(e) => handleCategoryDrop(e, index)}>
+                                        <div draggable onDragStart={(e) => handleCategoryDragStart(e, index)} className={`sticky left-0 z-40 bg-white/95 backdrop-blur-sm border-r border-gray-200/60 p-4 flex flex-col justify-center group-hover:bg-gray-50 transition-colors border-l-4 ${category.color.value.replace('bg-', 'border-').split(' ')[0]} shadow-[4px_0_24px_rgba(0,0,0,0.02)] glass:!border-r-white/10 glass:shadow-glass`} style={{ width: sidebarWidth, minWidth: sidebarWidth, borderLeftColor: category.color?.hex || '#ccc', ...(glassMode ? { background: "linear-gradient(rgba(0,0,0,0.65), rgba(0,0,0,0.65)), url('/glass-bg.png') center/cover fixed" } : {}) }}>
+                                            {glassMode && <div className="absolute inset-0 bg-transparent group-hover:bg-white/10 transition-colors pointer-events-none" />}
+                                            <div className="relative z-10 font-semibold text-gray-800 glass:!text-gray-100 flex items-center justify-between group/header overflow-hidden">
                                                 <div className="flex items-center gap-2 truncate pr-2 cursor-pointer" onDoubleClick={() => setEditingCategory(category)}>
                                                     <button onClick={(e) => { e.stopPropagation(); toggleCategoryCollapse(category.id); }} className="text-gray-400 hover:text-indigo-600 transition-colors">{category.collapsed ? <ChevronRightIcon size={16} /> : <CornerDownLeft size={16} className="rotate-0" />}</button>
                                                     <span className="truncate hover:underline decoration-dashed underline-offset-4">{category.title}</span>
@@ -620,7 +638,7 @@ export default function App() {
                                                     <div className="text-gray-400 cursor-grab active:cursor-grabbing hover:text-gray-700" title="Kéo để sắp xếp"><GripVertical size={14} /></div>
                                                 </div>
                                             </div>
-                                            <div className="text-xs text-gray-400 mt-1 flex items-center gap-2 ml-6"><span className={`w-2 h-2 rounded-full ${category.color.value.split(' ')[0].replace('bg-', 'bg-')}`}></span></div>
+                                            <div className="relative z-10 text-xs text-gray-400 mt-1 flex items-center gap-2 ml-6"><span className={`w-2 h-2 rounded-full ${category.color.value.split(' ')[0].replace('bg-', 'bg-')}`}></span></div>
                                             <div className="absolute right-0 top-0 bottom-0 w-1 cursor-col-resize hover:bg-indigo-500 z-30" onMouseDown={startResizingSidebar} />
                                         </div>
 
@@ -658,7 +676,7 @@ export default function App() {
                                             }
 
                                             return (
-                                                <div key={`${category.id}-${dateStr}`} style={{ width: dayWidth, minWidth: dayWidth }} className={`flex-shrink-0 min-h-[120px] p-2 transition-all duration-300 group/cell relative ${isToday ? 'bg-indigo-50/40' : (isWeekend ? 'bg-slate-50/30' : 'bg-transparent')} hover:bg-gray-50/80 cursor-pointer`}
+                                                <div key={`${category.id}-${dateStr}`} style={{ width: dayWidth, minWidth: dayWidth }} className={`flex-shrink-0 min-h-[120px] p-2 transition-all duration-300 group/cell relative ${isToday ? 'bg-indigo-50/40 glass:bg-indigo-900/40' : (isWeekend ? 'bg-slate-50/30 glass:bg-transparent' : 'bg-transparent')} hover:bg-gray-50/80 glass:hover:bg-white/10 cursor-pointer`}
                                                     onDragOver={handleDragOver}
                                                     onDrop={(e) => handleDrop(e, category.id, dateStr)}
                                                     onDoubleClick={(e) => { handleOpenAddTask({ date: dateStr, categoryId: category.id }); }}
@@ -688,8 +706,8 @@ export default function App() {
                                 )
                             })}
 
-                            <div className="flex border-b border-gray-300 group">
-                                <div className="sticky left-0 z-30 bg-white/95 backdrop-blur-sm border-r border-gray-200/60 flex flex-col justify-center border-l-4 border-transparent shadow-[4px_0_24px_rgba(0,0,0,0.02)]" style={{ width: sidebarWidth, minWidth: sidebarWidth }}>
+                            <div className="flex border-b border-gray-300 glass:border-white/10 group">
+                                <div className="sticky left-0 z-30 bg-white/95 backdrop-blur-sm border-r border-gray-200/60 flex flex-col justify-center border-l-4 border-transparent shadow-[4px_0_24px_rgba(0,0,0,0.02)] glass:!border-r-white/10 glass:shadow-glass" style={{ width: sidebarWidth, minWidth: sidebarWidth, ...(glassMode ? { background: "linear-gradient(rgba(0,0,0,0.65), rgba(0,0,0,0.65)), url('/glass-bg.png') center/cover fixed" } : {}) }}>
                                     {isCreatingCategory ? (
                                         <div className="p-3 m-2 bg-white border border-indigo-200 rounded-xl shadow-lg animate-in zoom-in-95 duration-200">
                                             <input autoFocus type="text" value={newCategoryName} onChange={(e) => setNewCategoryName(e.target.value)} onKeyDown={(e) => { if (e.key === 'Enter') handleSaveCategory(); if (e.key === 'Escape') setIsCreatingCategory(false); }} placeholder="Tên hạng mục..." className="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm mb-2 focus:ring-2 focus:ring-indigo-500 focus:outline-none" />
@@ -717,7 +735,7 @@ export default function App() {
             {confirmDialog && <ConfirmModal isOpen={true} onClose={() => setConfirmDialog(null)} {...confirmDialog} />}
             {contextMenu && <ContextMenu position={contextMenu.position} type={contextMenu.type} data={contextMenu.data} onClose={() => setContextMenu(null)} onAction={handleContextMenuAction} />}
 
-            {showAISettings && <SettingsAI onClose={() => setShowAISettings(false)} />}
+            {showAISettings && <SettingsAI onClose={() => setShowAISettings(false)} glassMode={glassMode} setGlassMode={setGlassMode} />}
             <AIAssistant
                 tasks={tasks}
                 categories={categories}
